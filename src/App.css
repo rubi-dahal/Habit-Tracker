@@ -1,0 +1,60 @@
+body{
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fffcf4;
+    max-width: 2000px;
+
+}
+
+
+@media (max-width: 690px) {
+    .hero-title {
+        font-size: 1.5rem  !important;
+        line-height: 1.1;
+    }
+
+    .hero-subtitle {
+        font-size: 0.95rem  !important;
+    }
+
+    .min-w\[700px\] {
+        min-width: 700px;
+    }
+
+    
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+
+@media (min-width: 600px) {
+    .hero-cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2.5rem; 
+    }
+}
+
+
+@media (max-width: 500px) {
+    .week-nav {
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .week-nav svg {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+
+   
+    .week-nav-date {
+        display: inline-block;
+        font-size: 0.8rem;
+        max-width: 6.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
