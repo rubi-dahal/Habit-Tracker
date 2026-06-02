@@ -255,7 +255,7 @@ const Habit = ({
                       const isTodayCell = idx === absoluteTodayIndex && (weekOffset === 0 || weekOffset === undefined)
                       const isEditable = isEditableDay(idx)
                       return (
-                        <div key={idx} className={'flex justify-center ' + (isTodayCell ? 'bg-green-50 rounded-md' : '')}>
+                        <div key={idx} className={'flex justify-center ' + (isTodayCell ? ' rounded-md' : '')}>
                           <input
                             type="checkbox"
                             checked={done}
@@ -316,7 +316,7 @@ const Habit = ({
           <h4 className='font-medium text-green-900'>
             Small daily improvements lead to remarkable results.
           </h4>
-          <p className='text-green-700 text-sm mt-2 font-medium'>Daily reminder</p>
+          <p className='text-green-700 text-sm mt-2 font-medium'>-daily reminder</p>
         </div>
 
         
