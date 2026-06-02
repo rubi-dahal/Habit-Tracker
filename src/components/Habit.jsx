@@ -109,6 +109,7 @@ const Habit = ({
   const todayProgress = habits.reduce((acc, habit) => {
     return acc + (habit.status[absoluteTodayIndex] ? 1 : 0)
   }, 0)
+  
   const getWeekStart = (offset) => {
     const now = new Date();
     const day = now.getDay(); 
@@ -124,6 +125,12 @@ const Habit = ({
   const weekStart = getWeekStart(weekOffset || 0);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
+  
+  const isEditableDay = (dayIndex) => {
+    if (weekOffset > 0) return false;
+    if (weekOffset < 0) return true;
+    return dayIndex <= absoluteTodayIndex;
+  };
 
   return (
     <div className='flex flex-col items-start px-4 sm:px-6 md:px-10 gap-8'>
@@ -188,69 +195,81 @@ const Habit = ({
 
         <div className="w-full overflow-x-auto">
           <div className="min-w-[700px]">
-            <div className="grid grid-cols-[2fr_repeat(7,1fr)] gap-2 justify-items-center font-semibold">
-              <div></div>
-              {days.map((day, idx) => (
-                <div
-                  key={day}
-                  className={
-                    "text-center text-sm " +
-                    (idx === absoluteTodayIndex && (weekOffset === 0 || weekOffset === undefined) ? 'text-green-600' : '')
-                  }
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {habits.map((habit, i) => (
-              <div key={i} className="grid grid-cols-[2fr_repeat(7,1fr)] gap-2 items-center py-3 border-b border-gray-100">
-                <div className="flex flex-col gap-2 pr-4 font-medium">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-
-                    {editingIndex === i ? (
-                      <form onSubmit={saveEdit} className="flex flex-col items-start gap-2 w-full">
-                        <input
-                          value={editInput}
-                          onChange={(e) => setEditInput(e.target.value)}
-                          className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
-                        <div className="flex gap-2">
-                          <button type="submit" className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600">Save</button>
-                          <button type="button" onClick={cancelEdit} className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">Cancel</button>
-                        </div>
-                      </form>
-                    ) : (
-                      <span>{habit.name}</span>
-                    )}
-                  </div>
-
-                  {editingIndex !== i && (
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <button type="button" onClick={() => startEditing(i, habit.name)} className="hover:text-green-600">Rename</button>
-                      <span>•</span>
-                      <button type="button" onClick={() => deleteHabit(i)} className="hover:text-red-600">Delete</button>
-                    </div>
-                  )}
-                </div>
-
-                {habit.status.map((done, idx) => {
-                  const isTodayCell = idx === absoluteTodayIndex && (weekOffset === 0 || weekOffset === undefined)
-                  return (
-                    <div key={idx} className={'flex justify-center ' + (isTodayCell ? 'rounded-md' : '')}>
-                      <input
-                        type="checkbox"
-                        checked={done}
-                        onChange={() => { if (isTodayCell) toggleCheckbox(i, idx) }}
-                        disabled={!isTodayCell}
-                        className={'w-5 h-5 accent-green-500 ' + (!isTodayCell ? 'cursor-not-allowed' : 'cursor-pointer')}
-                      />
-                    </div>
-                  )
-                })}
+            {habits.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="text-5xl mb-4">📝</div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No habits yet</h3>
+                <p className="text-gray-500 mb-6">Add your first habit below to get started</p>
               </div>
-            ))}
+            ) : (
+              <>
+                <div className="grid grid-cols-[2fr_repeat(7,1fr)] gap-2 justify-items-center font-semibold">
+                  <div></div>
+                  {days.map((day, idx) => (
+                    <div
+                      key={day}
+                      className={
+                        "text-center text-sm " +
+                        (idx === absoluteTodayIndex && (weekOffset === 0 || weekOffset === undefined) ? 'text-green-600 font-bold' : '')
+                      }
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {habits.map((habit, i) => (
+                  <div key={i} className="grid grid-cols-[2fr_repeat(7,1fr)] gap-2 items-center py-3 border-b border-gray-100">
+                    <div className="flex flex-col gap-2 pr-4 font-medium">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+
+                        {editingIndex === i ? (
+                          <form onSubmit={saveEdit} className="flex flex-col items-start gap-2 w-full">
+                            <input
+                              value={editInput}
+                              onChange={(e) => setEditInput(e.target.value)}
+                              className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                              autoFocus
+                            />
+                            <div className="flex gap-2">
+                              <button type="submit" className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600">Save</button>
+                              <button type="button" onClick={cancelEdit} className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">Cancel</button>
+                            </div>
+                          </form>
+                        ) : (
+                          <span>{habit.name}</span>
+                        )}
+                      </div>
+
+                      {editingIndex !== i && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <button type="button" onClick={() => startEditing(i, habit.name)} className="hover:text-green-600">Rename</button>
+                          <span>•</span>
+                          <button type="button" onClick={() => deleteHabit(i)} className="hover:text-red-600">Delete</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {habit.status.map((done, idx) => {
+                      const isTodayCell = idx === absoluteTodayIndex && (weekOffset === 0 || weekOffset === undefined)
+                      const isEditable = isEditableDay(idx)
+                      return (
+                        <div key={idx} className={'flex justify-center ' + (isTodayCell ? 'bg-green-50 rounded-md' : '')}>
+                          <input
+                            type="checkbox"
+                            checked={done}
+                            onChange={() => { if (isEditable) toggleCheckbox(i, idx) }}
+                            disabled={!isEditable}
+                            className={'w-5 h-5 accent-green-500 ' + (!isEditable ? 'cursor-not-allowed opacity-40' : 'cursor-pointer')}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -269,7 +288,7 @@ const Habit = ({
 
             <button
               type="submit"
-              className='bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600'
+              className='bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 font-medium'
             >
               Add
             </button>
@@ -281,9 +300,9 @@ const Habit = ({
 
           <div className='w-full bg-gray-200 rounded-full h-2 mb-2'>
             <div
-              className='bg-green-500 h-2 rounded-full'
+              className='bg-green-500 h-2 rounded-full transition-all'
               style={{
-                width: `${(todayProgress / habits.length) * 100}%`
+                width: habits.length > 0 ? `${(todayProgress / habits.length) * 100}%` : '0%'
               }}
             ></div>
           </div>
@@ -294,10 +313,10 @@ const Habit = ({
         </div>
 
         <div className='flex flex-col bg-green-100 rounded-lg p-6 border border-green-400 w-full md:w-1/2'>
-          <h4 className='font-medium'>
-            “Small daily improvements are the key to staggering long-term results.”
+          <h4 className='font-medium text-green-900'>
+            Small daily improvements lead to remarkable results.
           </h4>
-          <p className='text-gray-600 text-sm mt-2'>Daily reminder</p>
+          <p className='text-green-700 text-sm mt-2 font-medium'>Daily reminder</p>
         </div>
 
         
